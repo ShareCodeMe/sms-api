@@ -29,15 +29,8 @@ enum UserStatus {
   UNKNOW
 }
 
-enum LessonCategory {
-  LANGUANGES
-  ART
-  SCIENCE
-  SPORT
-}
-
 model User {
-  id                    String                 @id @default(cuid())
+  id                    String                 @id @default(uuid())
   name                  String
   email                 String?                @unique
   emailVerified         DateTime?
@@ -55,7 +48,7 @@ model User {
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String  @id @default(uuid())
   userId            String
   type              String
   provider          String
@@ -74,7 +67,7 @@ model Account {
 }
 
 model VerificationToken {
-  id      String   @id @default(cuid())
+  id      String   @id @default(uuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -83,7 +76,7 @@ model VerificationToken {
 }
 
 model PasswordResetToken {
-  id      String   @id @default(cuid())
+  id      String   @id @default(uuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -92,7 +85,7 @@ model PasswordResetToken {
 }
 
 model TwoFactorToken {
-  id      String   @id @default(cuid())
+  id      String   @id @default(uuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -101,7 +94,7 @@ model TwoFactorToken {
 }
 
 model TwoFactorConfirmation {
-  id String @id @default(cuid())
+  id String @id @default(uuid())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -110,7 +103,7 @@ model TwoFactorConfirmation {
 }
 
 model Teachers {
-  id     String @id @default(cuid())
+  id     String @id @default(uuid())
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
 
@@ -118,7 +111,11 @@ model Teachers {
   phone     String? @unique
   address   String?
   bloodType String?
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  deletedAt DateTime? @db.Timestamptz()
 
+  subject Subject[]
   lesson     Lessons[]     @relation("lessontoteacher")
   assignment Assignments[] @relation("assignmenttoteacher")
 
@@ -126,13 +123,16 @@ model Teachers {
 }
 
 model Students {
-  id        String  @id @default(cuid())
+  id        String  @id @default(uuid())
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
   name      String?
   phone     String? @unique
   address   String?
   bloodType String?
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  deletedAt DateTime? @db.Timestamptz()
 
   parentId String?
   parent   Parents? @relation(fields: [parentId], references: [id])
@@ -147,20 +147,23 @@ model Students {
 }
 
 model Parents {
-  id        String     @id @default(cuid())
+  id        String     @id @default(uuid())
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
   name      String?
   phone     String?    @unique
   address   String?
-  createdAt DateTime   @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  deletedAt DateTime? @db.Timestamptz()
+
   students  Students[]
 
   @@unique([userId])
 }
 
 model Grade {
-  id    String @id @default(cuid())
+  id    String @id @default(uuid())
   level Int
 
   students Students[]
@@ -170,7 +173,7 @@ model Grade {
 }
 
 model Classrooms {
-  id                 String         @id @default(cuid())
+  id                 String         @id @default(uuid())
   name               String
   cap                String
   schedule           Schedule[]     @relation("classtoschedule")
@@ -185,7 +188,7 @@ model Classrooms {
 }
 
 model OnClassroom {
-  id          String     @id @default(cuid())
+  id          String     @id @default(uuid())
   userId      String
   classroomId String
   student     Students   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -194,12 +197,21 @@ model OnClassroom {
   @@index([userId, classroomId])
 }
 
+model Subject {
+  id       String        @id @default(uuid())
+  name     String
+
+  teacher  Teachers[]
+  lesson   Lessons[]
+}
+
 model Lessons {
-  id         String         @id @default(cuid())
+  id         String         @id @default(uuid())
   name       String
   teacher    Teachers       @relation("lessontoteacher", fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   teacherId  String
-  cat        LessonCategory
+  subject    Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  subjectId  String
   schedule   Schedule[]     @relation("lessontoschedule")
   assingment Assignments[]  @relation("lessontoassingment")
   attendance Attendances[]  @relation("lessontoattendance")
@@ -209,7 +221,7 @@ model Lessons {
 }
 
 model Schedule {
-  id        String     @id @default(cuid())
+  id        String     @id @default(uuid())
   lessonId  String
   classId   String
   day       DateTime
@@ -221,7 +233,7 @@ model Schedule {
 }
 
 model Assignments {
-  id       String   @id @default(cuid())
+  id       String   @id @default(uuid())
   task     String
   deadline DateTime
   fileUrl  String?
@@ -240,7 +252,7 @@ model Assignments {
 }
 
 model Attendances {
-  id      String   @id @default(cuid())
+  id      String   @id @default(uuid())
   date    DateTime
   present Boolean
 
@@ -253,7 +265,7 @@ model Attendances {
 }
 
 model Results {
-  id    String @id @default(cuid())
+  id    String @id @default(uuid())
   score Int
 
   studentId    String
@@ -267,7 +279,7 @@ model Results {
 }
 
 model Exams {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   title     String
   startTime DateTime
   endTime   DateTime
@@ -280,7 +292,7 @@ model Exams {
 }
 
 model Event {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   title       String
   description String
   startTime   DateTime
@@ -293,7 +305,7 @@ model Event {
 }
 
 model Announcement {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   title       String
   description String
   date        DateTime
