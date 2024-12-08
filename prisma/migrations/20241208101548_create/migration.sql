@@ -8,7 +8,7 @@ CREATE TYPE "UserGender" AS ENUM ('MALE', 'FEMALE', 'UNKNOW');
 CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'IN_ACTIVE', 'BANNED', 'UNKNOW');
 
 -- CreateEnum
-CREATE TYPE "LessonCategory" AS ENUM ('LANGUANGES', 'ART', 'SCIENCE', 'SPORT');
+CREATE TYPE "LessonCategory" AS ENUM ('MATH', 'BIOLOGY', 'CHEMISTRY', 'PHYSICS', 'KHMER', 'ENGLISH', 'GEOGRAPHY', 'HISTORY', 'EARTH', 'ICT', 'MORALITY_CIVIC', 'SPORT');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -90,6 +90,9 @@ CREATE TABLE "Teachers" (
     "phone" TEXT,
     "address" TEXT,
     "bloodType" TEXT,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL,
+    "deletedAt" TIMESTAMPTZ,
 
     CONSTRAINT "Teachers_pkey" PRIMARY KEY ("id")
 );
@@ -102,6 +105,9 @@ CREATE TABLE "Students" (
     "phone" TEXT,
     "address" TEXT,
     "bloodType" TEXT,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL,
+    "deletedAt" TIMESTAMPTZ,
     "parentId" TEXT,
     "gradeId" TEXT,
 
@@ -115,7 +121,9 @@ CREATE TABLE "Parents" (
     "name" TEXT,
     "phone" TEXT,
     "address" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL,
+    "deletedAt" TIMESTAMPTZ,
 
     CONSTRAINT "Parents_pkey" PRIMARY KEY ("id")
 );

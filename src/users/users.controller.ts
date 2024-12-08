@@ -1,11 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+  NotFoundException,
+  BadRequestException, UsePipes, ValidationPipe,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBody, ApiOperation, ApiTags, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('users')
-@Controller('users')
+@Controller({ path: 'users', version: '1' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -20,9 +31,15 @@ export class UsersController {
     type: CreateUserDto 
   })
   @ApiResponse({ status: 201, description: 'The user has been successfully created.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @UsePipes(new ValidationPipe())
   create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    try {
+      return this.usersService.create(createUserDto);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @ApiOperation({ 
@@ -34,8 +51,15 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'The user has been successfully retrieved.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      return this.usersService.findOne(id);
+    } catch (error) {
+      if (error.status === 404) {
+        throw new NotFoundException(error.message);
+      }
+      throw new BadRequestException(error.message);
+    }
   }
 
   @ApiOperation({ 
@@ -50,9 +74,18 @@ export class UsersController {
   })
   @ApiResponse({ status: 200, description: 'The user has been successfully updated.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @UsePipes(new ValidationPipe())
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
+    try {
+      return this.usersService.update(id, updateUserDto);
+    } catch (error) {
+      if (error.status === 404) {
+        throw new NotFoundException(error.message);
+      }
+      throw new BadRequestException(error.message);
+    }
   }
 
   @ApiOperation({ 
@@ -63,8 +96,16 @@ export class UsersController {
   @ApiParam({ name: 'id', description: 'The ID of the user to delete' })
   @ApiResponse({ status: 200, description: 'The user has been successfully deleted.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      return this.usersService.remove(id);
+    } catch (error) {
+      if (error.status === 404) {
+        throw new NotFoundException(error.message);
+      }
+      throw new BadRequestException(error.message);
+    }
   }
 }

@@ -20,7 +20,7 @@ async function bootstrap() {
     SwaggerModule.setup(swaggerConfig.path, app, document);
   }
   app.enableCors({
-    origin: '*', // Você pode especificar um domínio específico aqui
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept',
   });

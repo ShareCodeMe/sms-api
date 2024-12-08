@@ -29,13 +29,6 @@ enum UserStatus {
   UNKNOW
 }
 
-enum LessonCategory {
-  LANGUANGES
-  ART
-  SCIENCE
-  SPORT
-}
-
 model User {
   id                    String                 @id @default(uuid())
   name                  String
@@ -122,6 +115,7 @@ model Teachers {
   updatedAt DateTime @updatedAt @db.Timestamptz()
   deletedAt DateTime? @db.Timestamptz()
 
+  subject Subject[]
   lesson     Lessons[]     @relation("lessontoteacher")
   assignment Assignments[] @relation("assignmenttoteacher")
 
@@ -203,12 +197,21 @@ model OnClassroom {
   @@index([userId, classroomId])
 }
 
+model Subject {
+  id       String        @id @default(uuid())
+  name     String
+
+  teacher  Teachers[]
+  lesson   Lessons[]
+}
+
 model Lessons {
   id         String         @id @default(uuid())
   name       String
   teacher    Teachers       @relation("lessontoteacher", fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   teacherId  String
-  cat        LessonCategory
+  subject    Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  subjectId  String
   schedule   Schedule[]     @relation("lessontoschedule")
   assingment Assignments[]  @relation("lessontoassingment")
   attendance Attendances[]  @relation("lessontoattendance")
